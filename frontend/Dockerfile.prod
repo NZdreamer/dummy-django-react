@@ -1,0 +1,67 @@
+# Todo:
+# add dockerfile prod to prod docker compose
+# fix nginx npm https://stackoverflow.com/questions/67485397/docker-entrypoint-sh-38-exec-npm-not-found
+
+FROM node:14 as build
+
+WORKDIR /frontend
+
+COPY package.json /frontend/
+COPY package-lock.json /frontend/
+
+
+COPY . /frontend
+
+RUN npm install
+
+# # Use a build argument to determine the build command
+ARG BUILD_COMMAND=build
+# RUN if [ "$BUILD_COMMAND" = "build" ] ; then npm run build ; fi
+
+# # If it's a development build, start the development server
+# RUN if [ "$BUILD_COMMAND" = "start" ] ; then npm start ; fi
+
+
+RUN npm run build
+# RUN npm run serve
+# RUN npm start
+
+# CMD ["npm", "run", "build"]
+# CMD ["npm", "start"]
+
+
+# Stage 2 - the production environment
+# FROM nginx
+# COPY --from=build /frontend/build /usr/share/nginx/html
+# EXPOSE 80
+# CMD ["nginx", "-g", "daemon off;"]
+
+
+# FROM node:13.12.0-alpine as builder
+# WORKDIR '/app'
+# COPY package.json .
+# RUN npm install
+# COPY . .
+# RUN npm run build
+
+# FROM nginx
+# COPY --from=builder /app/build /usr/share/nginx/html
+
+
+
+# # Stage 2: Serve the frontend using a web server (e.g., Express)
+# FROM node:14
+
+# # Install a simple web server like 'serve' to serve the static files
+# RUN npm install -g serve
+
+# WORKDIR /app
+
+# # Copy the built frontend files from the 'build' directory created in the previous stage
+# COPY --from=build /frontend/build /app
+
+# # Expose port 3000 (the default for 'serve')
+# EXPOSE 3000
+
+# # Start the web server to serve the static files on port 80
+# CMD ["serve", "-s", "build", "-l", "80"]
