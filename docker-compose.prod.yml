@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000  
+    # expose:
+    #   - 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./.env.prod
+
+  frontend:
+    image: frontend
+    build:
+      context: ./frontend
+      args:
+        - BUILD_COMMAND=build
+    command: npm run serve
+    ports:
+      - "3000:3000"
+    expose:
+      - 3000
+    depends_on:
+      - backend
+    volumes:
+      - frontend-build:/app/build
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/test/data
+    ports:
+      - "5431:5432"
+    env_file:
+      - ./.env.prod.db
+
+  nginx:
+    image: nginx
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - frontend-build:/usr/share/nginx/html
+    # volumes:
+      # - static_volume:/home/app/backend/staticfiles
+
+volumes:
+  postgres_data:
+  frontend-build:
+  # static_volume:
