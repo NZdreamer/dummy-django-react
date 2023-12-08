@@ -7,9 +7,10 @@ function App() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8001/test/')
+    fetch('${process.env.REACT_APP_BACKEND_URL}/test/')
       .then(res => res.json())
-      .then(data => setData(data.data));
+      // .then(data => setData(data.data));
+      .then(data => console.log(data));
   })
 
   return (
